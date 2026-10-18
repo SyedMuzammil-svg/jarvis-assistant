@@ -54,6 +54,7 @@ from memory.memory_manager import (
     save_session_summary, pop_last_session,
     search_memory, set_trim_notifier,
 )
+from memory.conversation_history import get_history
 
 # The file-backed tools (open_app, web_search, browser_control, …) are no longer
 # imported or declared here — they self-describe via a TOOL dict in their own
@@ -618,6 +619,8 @@ class JarvisLive:
         self._proactive        = ProactiveEngine()
         self._last_user_speech = time.monotonic()  # updated on every user utterance
         self._session_log: list[str] = []          # conversation turns for end-of-session summary
+        self._history          = get_history()
+        self._history.start_session()
 
         self._enhanced_live = True  # proactive audio; auto-disabled if the server rejects it
         self._tuned_live    = True  # turn-taking / media / thinking knobs; same fallback
@@ -1581,6 +1584,10 @@ class JarvisLive:
                                 self._last_out_logged = ""   # new exchange
                                 self.ui.write_log(f"You: {full_in}")
                                 self._session_log.append(f"User: {full_in}")
+                                try:
+                                    self._history.add_turn("user", full_in)
+                                except Exception as _he:
+                                    print(f"[History] ⚠️ Failed to log user turn: {_he}")
                                 if self._dashboard:
                                     asyncio.create_task(self._dashboard.broadcast({
                                         "type": "log", "speaker": "user",
@@ -1600,6 +1607,10 @@ class JarvisLive:
                                 self._last_out_logged = full_out
                                 self.ui.write_log(f"{self._asst_name}: {full_out}")
                                 self._session_log.append(f"{self._asst_name}: {full_out}")
+                                try:
+                                    self._history.add_turn("assistant", full_out)
+                                except Exception as _he:
+                                    print(f"[History] ⚠️ Failed to log assistant turn: {_he}")
                                 if self._dashboard:
                                     asyncio.create_task(self._dashboard.broadcast({
                                         "type": "log", "speaker": "jarvis",
@@ -1930,6 +1941,10 @@ class JarvisLive:
             )
             if summary:
                 save_session_summary(summary, lang)
+                try:
+                    self._history.end_session(summary=summary)
+                except Exception as _he:
+                    print(f"[History] ⚠️ Failed to end session: {_he}")
         except Exception as e:
             print(f"[Memory] ⚠️ Session summary failed: {e}")
 

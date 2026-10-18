@@ -90,14 +90,59 @@ def _restore_from_trash(original: Path) -> str:
             f"automatically, but it is there and can be restored by hand.")
 
 
-_SAFE_ROOTS: list[Path] = [
-    Path.home(),
-]
+def _get_system_protected_dirs() -> set[Path]:
+    """Critical operating system directories protected against writes and deletion."""
+    protected = set()
+    if _OS == "Windows":
+        for env_var in ["WINDIR", "SystemRoot"]:
+            val = os.environ.get(env_var)
+            if val:
+                protected.add(Path(val).resolve())
+        for env_var in ["ProgramFiles", "ProgramFiles(x86)", "ProgramData"]:
+            val = os.environ.get(env_var)
+            if val:
+                protected.add(Path(val).resolve())
+    elif _OS == "Darwin":
+        for p in ["/System", "/Library", "/bin", "/sbin", "/usr/bin"]:
+            protected.add(Path(p).resolve())
+    else:  # Linux
+        for p in ["/boot", "/sys", "/proc", "/dev", "/etc", "/bin", "/sbin", "/usr/bin"]:
+            protected.add(Path(p).resolve())
+    return protected
 
-def _is_safe_path(target: Path) -> bool:
-    """Is the given path inside _SAFE_ROOTS? If not, reject the operation."""
+def _get_safe_roots() -> list[Path]:
+    """All accessible drive roots and user directories for full file access."""
+    roots = [Path.home()]
+    if _OS == "Windows":
+        import string
+        for letter in string.ascii_uppercase:
+            drive = Path(f"{letter}:\\")
+            try:
+                if drive.exists():
+                    roots.append(drive)
+            except Exception:
+                pass
+    else:
+        roots.append(Path("/"))
+    return roots
+
+_SAFE_ROOTS: list[Path] = _get_safe_roots()
+
+def _is_safe_path(target: Path, write: bool = False) -> bool:
+    """Check if target path is accessible and not in a system-protected location if write=True."""
     try:
         resolved = target.resolve()
+        if not str(resolved).strip():
+            return False
+
+        if write:
+            for p in _get_system_protected_dirs():
+                try:
+                    if resolved == p or resolved.is_relative_to(p):
+                        return False
+                except Exception:
+                    continue
+
         return any(
             resolved == root.resolve() or resolved.is_relative_to(root.resolve())
             for root in _SAFE_ROOTS
@@ -230,7 +275,7 @@ def create_file(path: str, name: str = "", content: str = "") -> str:
     try:
         base   = _resolve_path(path)
         target = (base / name) if name else base
-        if not _is_safe_path(target):
+        if not _is_safe_path(target, write=True):
             return f"Access denied: {target}"
         target.parent.mkdir(parents=True, exist_ok=True)
         existed = target.exists()
@@ -252,7 +297,7 @@ def create_folder(path: str, name: str = "") -> str:
     try:
         base   = _resolve_path(path)
         target = (base / name) if name else base
-        if not _is_safe_path(target):
+        if not _is_safe_path(target, write=True):
             return f"Access denied: {target}"
         already = target.exists()
         target.mkdir(parents=True, exist_ok=True)
@@ -270,7 +315,7 @@ def delete_file(path: str, name: str = "") -> str:
     try:
         base   = _resolve_path(path)
         target = (base / name) if name else base
-        if not _is_safe_path(target):
+        if not _is_safe_path(target, write=True):
             return f"Access denied: {target}"
         if not target.exists():
             return f"Not found: {target.name}"
@@ -418,7 +463,7 @@ def write_file(path: str, name: str = "", content: str = "",
     try:
         base   = _resolve_path(path)
         target = (base / name) if name else base
-        if not _is_safe_path(target):
+        if not _is_safe_path(target, write=True):
             return f"Access denied: {target}"
         target.parent.mkdir(parents=True, exist_ok=True)
 

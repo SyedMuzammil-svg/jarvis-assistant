@@ -1,7 +1,7 @@
-# ⚙️ MARK LV (55)
-### The Ultimate Cross-Platform Personal AI Assistant — By FatihMakes
+# ⚙️ MARK LVI — JARVIS
+### The Ultimate Cross-Platform Personal AI Assistant — By Syed Muzammil
 
-> 📺 **[Watch the full setup video on YouTube](https://www.youtube.com/@FatihMakes)**
+> 🤖 **[GitHub Repository](https://github.com/SyedMuzammil-svg/jarvis-assistant)**
 
 A real-time voice AI that can hear, see, speak, and control your computer — on any OS. Supports Windows, macOS, and Linux. Built on the Gemini Live API for native audio streaming, delivering zero subscriptions and total digital autonomy.
 
@@ -274,8 +274,8 @@ It is held in memory only, deliberately: writing it to disk would make a fresh l
 ## ⚡ Quick Start
 
 ```bash
-git clone https://github.com/FatihMakes/Mark-LV.git
-cd Mark-LV
+git clone https://github.com/SyedMuzammil-svg/jarvis-assistant.git
+cd jarvis-assistant
 python setup.py        # installs deps for YOUR OS + the browser automation engine
 python main.py
 ```
@@ -389,10 +389,10 @@ Licensed under **[Creative Commons BY-NC 4.0](https://creativecommons.org/licens
 
 ## 👤 Connect with the Creator
 
-Engineered by a developer building a real-world JARVIS-style assistant.
+Engineered by **Syed Muzammil** ([@SyedMuzammil-svg](https://github.com/SyedMuzammil-svg)).
 ⭐ **Star the repository to support the journey to Mark 100.**
 
 | Platform | Link |
 | --- | --- |
-| YouTube | [@FatihMakes](https://www.youtube.com/@FatihMakes) |
-| Instagram | [@fatihmakes](https://www.instagram.com/fatihmakes) |
+| GitHub | [@SyedMuzammil-svg](https://github.com/SyedMuzammil-svg) |
+| Repository | [jarvis-assistant](https://github.com/SyedMuzammil-svg/jarvis-assistant) |

@@ -73,18 +73,21 @@ SMART = "smart"
 # Which model answers which tier. Change it here or in the config
 # (`claude_fast_model` / `claude_smart_model`), never at a call site.
 _MODELS = {
-    SMART: "claude-fable-5",
-    FAST:  "claude-sonnet-5",
+    SMART: "claude-fable-5-1",  # Updated to Fable 5.1 for better reasoning
+    FAST:  "claude-sonnet-5-5",  # Updated to Sonnet 5.5 for better speed/cost
 }
 
 # USD per million tokens: (input, output). From the platform pricing docs; used
 # only to estimate against the daily cap, so a stale number shifts the cap
 # rather than breaking anything.
 _PRICES = {
-    "claude-fable-5":    (10.0, 50.0),
-    "claude-fable-5-1":  (10.0, 50.0),
-    "claude-sonnet-5":   (3.0, 15.0),
-    "claude-sonnet-5-5": (2.0, 10.0),
+    # Claude 5.x models (latest)
+    "claude-opus-5-5":   (4.0, 20.0),  # Best for agentic coding, $4/$20
+    "claude-fable-5-1":  (10.0, 50.0), # Best for demanding reasoning, $10/$50
+    "claude-fable-5":    (10.0, 50.0), # Original Fable 5
+    "claude-sonnet-5-5": (2.0, 10.0),  # Best speed/intelligence balance, $2/$10
+    "claude-sonnet-5":   (3.0, 15.0),  # Original Sonnet 5
+    "claude-haiku-5-5":  (0.10, 0.50), # Fastest for simple tasks, $0.10/$0.50
 }
 _PRICE_FALLBACK = (10.0, 50.0)
 
